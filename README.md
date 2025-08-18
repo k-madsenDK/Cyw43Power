@@ -1,25 +1,49 @@
 # Cyw43Power (Arduino Pico W / Pico 2 W)
 
-Minimal wrapper to control the CYW43 WiFi power-save/performance mode on Raspberry Pi Pico W and Pico 2 W when using the Earle Philhower Arduino core. It also exposes a couple of safe helpers for reading RSSI and link status.
+Minimal wrapper to control the CYW43 WiFi power-save/performance mode on Raspberry Pi Pico W and Pico 2 W when using the Earle Philhower Arduino core. It also exposes helpers for reading RSSI and link status.
 
 Why
-- Some access points are aggressive about power-save clients, causing periodic disconnects or sluggish throughput.
-- Disabling power save ("NoSave") often stabilizes the connection and reduces latency.
+- Some access points aggressively manage power-save clients, causing periodic disconnects or higher latency.
+- Disabling power save (“NoSave”) often stabilizes the connection and reduces latency.
 
 Features
-- setPowerMode(Default | NoSave | Performance) — safely map to the underlying CYW43 driver.
-- getRSSI(int8_t& outDbm) — read current RSSI in dBm.
-- linkStatus() — get link status from the driver.
+- setPowerMode(Default | NoSave | Performance)
+- getRSSI(int8_t& outDbm)
+- linkStatus()
 
 Compatibility
 - Boards: Raspberry Pi Pico W (RP2040 + CYW43439), Raspberry Pi Pico 2 W (RP2350 + CYW43439)
-- Core: Earle Philhower Arduino-Pico (aka earlephilhower/arduino-pico)
-- Library architecture: `rp2040` (this core ID covers both RP2040 and RP2350 targets in this Arduino core)
+- Core: Earle Philhower Arduino-Pico (earlephilhower/arduino-pico)
+- Architectures: rp2040 (covers both RP2040 and RP2350 in this core)
+
+Important: library layout (no src/)
+- This library must be installed in a flat layout (legacy Arduino library layout).
+- Do NOT place the source files under a src/ subdirectory.
+- Expected structure:
+  Cyw43Power/
+    Cyw43Power.h
+    Cyw43Power.cpp
+    library.properties
+    keywords.txt
+    README.md
+    examples/
+      DisablePowerSave/
+        DisablePowerSave.ino
 
 Installation
-- Copy this folder into your Arduino sketchbook libraries as "Cyw43Power".
-- Restart Arduino IDE.
-- Open the example: File → Examples → Cyw43Power → DisablePowerSave.
+
+Option A: Manual install
+1) Download/clone this repository.
+2) Copy the folder “Cyw43Power” into your Arduino sketchbook libraries folder:
+   - Linux/macOS: ~/Arduino/libraries/
+   - Windows: Documents/Arduino/libraries/
+3) Ensure the files are directly inside Cyw43Power/ (not under src/).
+4) Restart Arduino IDE.
+5) Open: File → Examples → Cyw43Power → DisablePowerSave.
+
+Option B: Using git
+- Clone directly into your libraries folder:
+  git clone https://github.com/k-madsenDK/Cyw43Power.git ~/Arduino/libraries/Cyw43Power
 
 Quick start
 ```cpp
@@ -59,7 +83,7 @@ void loop() {
 API
 - bool setPowerMode(PowerMode mode)
   - PowerMode: Default | NoSave | Performance (Performance maps to NO_POWERSAVE if the macro is unavailable)
-  - Returns true on success, false if the driver headers/symbols are not exposed in your core build.
+  - Returns true on success, false if the driver headers/symbols are not exposed by your core build.
 - bool getRSSI(int8_t& outDbm)
   - Returns true and sets outDbm on success. Typical range: -30..-90 dBm (negative values).
 - int linkStatus()
@@ -71,12 +95,5 @@ Notes
 - Graceful fallback: If the core doesn’t expose pico/cyw43_arch.h and cyw43.h, functions return false / -1 without crashing.
 - RSSI signature: This library uses the newer signature int cyw43_wifi_get_rssi(cyw43_t*, int32_t*).
 
-Troubleshooting
-- If setPowerMode returns UNAVAILABLE: Your installed core likely doesn’t expose cyw43 symbols/headers in that version. Update the core or request an official API (e.g., WiFi.setPowerMode()) to be exposed.
-- Multiple WiFi libraries found: Ensure you’re using the WiFi library bundled with the RP2040 core (shown in the compile log).
-
 License
 - MIT (see LICENSE)
-
-Acknowledgements
-- Earle Philhower Arduino-Pico core and the CYW43 driver from the Pico SDK.
